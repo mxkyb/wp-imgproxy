@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Plugin Name: Tachyon
- * Version: 0.11.1
- * Description: A standalone tachyon proof of concept
- * Author: Joe Hoyle | Human Made | Automattic Inc
+ * Plugin Name: WP-ImgProxy
+ * Version: 0.0.1
+ * Description: A plugin to use ImgProxy with S3-Uploads on WordPress
+ * Author: Max Kieltyka | Joe Hoyle | Human Made | Automattic Inc
  */
 
 /**
  * Copyright: Automattic Inc
  * Copyright: Human Made Limited
+ * Copyright: Max Kieltyka
  */
 
 if ( ! defined( 'TACHYON_URL' ) || ! TACHYON_URL ) {

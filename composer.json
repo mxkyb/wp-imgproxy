@@ -1,12 +1,12 @@
 {
-    "name": "humanmade/tachyon-plugin",
-    "description": "Rewrites WordPress image URLs to use Tachyon",
+    "name": "mxkyb/wp-imgproxy",
+    "description": "Rewrites WordPress image URLs to use ImgProxy",
     "type": "wordpress-plugin",
     "license": "GPL-3.0",
     "authors": [
         {
-            "name": "Joe Hoyle",
-            "email": "joe@humanmade.com"
+            "name": "Max Kieltyka",
+            "email": "maxkieltyka@gmail.com"
         }
     ],
     "require": {},

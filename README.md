@@ -1,4 +1,4 @@
-<table width="100%">
+<!-- <table width="100%">
 	<tr>
 		<td align="left" width="70">
 			<strong>Tachyon</strong><br />
@@ -81,7 +81,7 @@ add_filter( 'tachyon_skip_for_url', function ( $skip, $image_url, $args ) {
 	if ( strpos( $image_url, 'original' ) !== false ) {
 		return true;
 	}
-	
+
 	return $skip;
 }, 10, 3 );
 ```
@@ -95,7 +95,7 @@ add_filter( 'tachyon_pre_image_url', function ( $image_url, $args ) {
 	if ( rand( 1, 2 ) === 2 ) {
 		$image_url = str_replace( TACHYON_URL, TACHYON_URL_2, $image_url );
 	}
-	
+
 	return $image_url;
 }, 10, 2 );
 ```
@@ -109,7 +109,7 @@ add_filter( 'tachyon_pre_args', function ( $args ) {
 	if ( isset( $args['resize'] ) ) {
 		$args['crop_strategy'] = 'smart';
 	}
-	
+
 	return $args;
 } );
 ```
@@ -122,12 +122,10 @@ Defaults to `true`. `width` & `height` attributes on image tags are removed by d
 ```php
 add_filter( 'tachyon_remove_size_attributes', '__return_true' );
 ```
+-->
+
+**This is under construction and far away from being done.**
 
 ## Credits
-Created by Human Made for high volume and large-scale sites, such as [Happytables](http://happytables.com/). We run Tachyon on sites with millions of monthly page views, and thousands of sites.
 
-Written and maintained by [Joe Hoyle](https://github.com/joehoyle).
-
-Tachyon is forked from Photon by Automattic Inc. As Tachyon is not an all-purpose image resizer, rather it uses a media library in Amazon S3, it has a different use case to Photon.
-
-Interested in joining in on the fun? [Join us, and become human!](https://hmn.md/is/hiring/)
+WP-Imgproxy is forked from Human Mades Tachyon, which is forked from Photon by Automattic Inc. I intend to use it in combination with Human Mades [S3-Uploads](https://github.com/humanmade/S3-Uploads) Plugin for WordPress, but instead of Tachyon, use [imgproxy](https://github.com/imgproxy/imgproxy).
