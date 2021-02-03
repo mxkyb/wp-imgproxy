@@ -1,6 +1,6 @@
 <?php
 
-class Tachyon {
+class WPImgProxy {
 	/**
 	 * Class variables
 	 */
@@ -39,15 +39,15 @@ class Tachyon {
 	private function __construct() {}
 
 	/**
-	 * Register actions and filters, but only if basic Tachyon functions are available.
-	 * The basic functions are found in ./functions.tachyon.php.
+	 * Register actions and filters, but only if basic WPImgProxy functions are available.
+	 * The basic functions are found in ./functions.wpimgproxy.php.
 	 *
 	 * @uses add_action, add_filter
 	 * @return null
 	 */
 	private function setup() {
 
-		if ( ! function_exists( 'tachyon_url' ) )
+		if ( ! function_exists( 'wpimgproxy_url' ) )
 			return;
 
 		// Images in post content and galleries
@@ -112,10 +112,10 @@ class Tachyon {
 	}
 
 	/**
-	 * Identify images in post content, and if images are local (uploaded to the current site), pass through Tachyon.
+	 * Identify images in post content, and if images are local (uploaded to the current site), pass through WPImgProxy.
 	 *
 	 * @param string $content
-	 * @uses self::validate_image_url, apply_filters, tachyon_url, esc_url
+	 * @uses self::validate_image_url, apply_filters, wpimgproxy_url, esc_url
 	 * @filter the_content
 	 * @return string
 	 */
@@ -159,15 +159,15 @@ class Tachyon {
 				$src = $src_orig = $images['img_url'][ $index ];
 
 				/**
-				 * Allow specific images to be skipped by Tachyon.
+				 * Allow specific images to be skipped by WPImgProxy.
 				 *
 				 * @since 2.0.3
 				 *
-				 * @param bool false Should Tachyon ignore this image. Default to false.
+				 * @param bool false Should WPImgProxy ignore this image. Default to false.
 				 * @param string $src Image URL.
 				 * @param string $tag Image Tag (Image HTML output).
 				 */
-				if ( apply_filters( 'tachyon_skip_image', false, $src, $tag ) )
+				if ( apply_filters( 'wpimgproxy_skip_image', false, $src, $tag ) )
 					continue;
 
 				// Support Automattic's Lazy Load plugin
@@ -180,7 +180,7 @@ class Tachyon {
 					$src = $src_orig = $lazy_load_src[1];
 				}
 
-				// Check if image URL should be used with Tachyon
+				// Check if image URL should be used with WPImgProxy
 				if ( self::validate_image_url( $src ) ) {
 					// Find the width and height attributes
 					$width = $height = false;
@@ -221,7 +221,7 @@ class Tachyon {
 						(
 							0 === strpos( $src, $upload_dir['baseurl'] ) ||
 							/**
-							 * Filter whether an image using an attachment ID in its class has to be uploaded to the local site to go through Tachyon.
+							 * Filter whether an image using an attachment ID in its class has to be uploaded to the local site to go through WPImgProxy.
 							 *
 							 * @since 2.0.3
 							 *
@@ -235,7 +235,7 @@ class Tachyon {
 							 * 	 @type $index Image index.
 							 * }
 							 */
-							apply_filters( 'tachyon_image_is_local', false, compact( 'src', 'tag', 'images', 'index' ) )
+							apply_filters( 'wpimgproxy_image_is_local', false, compact( 'src', 'tag', 'images', 'index' ) )
 						)
 					) {
 						$class_attachment_id = intval( array_pop( $class_attachment_id ) );
@@ -260,7 +260,7 @@ class Tachyon {
 								}
 
 								// If we still don't have a size for the image but know the dimensions,
-								// use the attachment sources to determine the size. Tachyon modifies
+								// use the attachment sources to determine the size. WPImgProxy modifies
 								// wp_get_attachment_image_src() to account for sizes created after upload.
 								if ( ! isset( $size ) && $width && $height ) {
 									$sizes = array_keys( $image_sizes );
@@ -338,12 +338,12 @@ class Tachyon {
 					if ( ! $fullsize_url && preg_match_all( '#-e[a-z0-9]+(-\d+x\d+)?\.(' . implode('|', self::$extensions ) . '){1}$#i', basename( $src ), $filename ) )
 						$fullsize_url = true;
 
-					// Build URL, first maybe removing WP's resized string so we pass the original image to Tachyon
+					// Build URL, first maybe removing WP's resized string so we pass the original image to WPImgProxy
 					if ( ! $fullsize_url ) {
 						$src = self::strip_image_dimensions_maybe( $src );
 					}
 
-					// Build array of Tachyon args and expose to filter before passing to Tachyon URL function
+					// Build array of WPImgProxy args and expose to filter before passing to WPImgProxy URL function
 					$args = array();
 
 					if ( false !== $width && false !== $height && false === strpos( $width, '%' ) && false === strpos( $height, '%' ) ) {
@@ -396,11 +396,11 @@ class Tachyon {
 					}
 
 					/**
-					 * Filter the array of Tachyon arguments added to an image when it goes through Tachyon.
+					 * Filter the array of WPImgProxy arguments added to an image when it goes through WPImgProxy.
 					 * By default, only includes width and height values.
 					 * @see https://developer.wordpress.com/docs/photon/api/
 					 *
-					 * @param array $args Array of Tachyon Arguments.
+					 * @param array $args Array of WPImgProxy Arguments.
 					 * @param array $args {
 					 * 	 Array of image details.
 					 *
@@ -412,26 +412,26 @@ class Tachyon {
 					 * 	 @type $attachment_id Attachment ID.
 					 * }
 					 */
-					$args = apply_filters( 'tachyon_post_image_args', $args, compact( 'tag', 'src', 'src_orig', 'width', 'height', 'attachment_id', 'size' ) );
+					$args = apply_filters( 'wpimgproxy_post_image_args', $args, compact( 'tag', 'src', 'src_orig', 'width', 'height', 'attachment_id', 'size' ) );
 
-					$tachyon_url = tachyon_url( $src, $args );
+					$wpimgproxy_url = wpimgproxy_url( $src, $args );
 
-					// Modify image tag if Tachyon function provides a URL
+					// Modify image tag if WPImgProxy function provides a URL
 					// Ensure changes are only applied to the current image by copying and modifying the matched tag, then replacing the entire tag with our modified version.
-					if ( $src != $tachyon_url ) {
+					if ( $src != $wpimgproxy_url ) {
 						$new_tag = $tag;
 
-						// If present, replace the link href with a Tachyoned URL for the full-size image.
+						// If present, replace the link href with a WPImgProxyed URL for the full-size image.
 						if ( ! empty( $images['link_url'][ $index ] ) && self::validate_image_url( $images['link_url'][ $index ] ) )
-							$new_tag = preg_replace( '#(href=["|\'])' . $images['link_url'][ $index ] . '(["|\'])#i', '\1' . tachyon_url( $images['link_url'][ $index ] ) . '\2', $new_tag, 1 );
+							$new_tag = preg_replace( '#(href=["|\'])' . $images['link_url'][ $index ] . '(["|\'])#i', '\1' . wpimgproxy_url( $images['link_url'][ $index ] ) . '\2', $new_tag, 1 );
 
-						// Supplant the original source value with our Tachyon URL
-						$tachyon_url = esc_url( $tachyon_url );
-						$new_tag = str_replace( $src_orig, $tachyon_url, $new_tag );
+						// Supplant the original source value with our WPImgProxy URL
+						$wpimgproxy_url = esc_url( $wpimgproxy_url );
+						$new_tag = str_replace( $src_orig, $wpimgproxy_url, $new_tag );
 
-						// If Lazy Load is in use, pass placeholder image through Tachyon
+						// If Lazy Load is in use, pass placeholder image through WPImgProxy
 						if ( isset( $placeholder_src ) && self::validate_image_url( $placeholder_src ) ) {
-							$placeholder_src = tachyon_url( $placeholder_src );
+							$placeholder_src = wpimgproxy_url( $placeholder_src );
 
 							if ( $placeholder_src != $placeholder_src_orig )
 								$new_tag = str_replace( $placeholder_src_orig, esc_url( $placeholder_src ), $new_tag );
@@ -440,7 +440,7 @@ class Tachyon {
 						}
 
 						// Remove the width and height arguments from the tag to prevent distortion
-						if ( apply_filters( 'tachyon_remove_size_attributes', true ) ) {
+						if ( apply_filters( 'wpimgproxy_remove_size_attributes', true ) ) {
 							$new_tag = preg_replace( '#(?<=\s)(width|height)=["|\']?[\d%]+["|\']?\s?#i', '', $new_tag );
 						}
 
@@ -451,7 +451,7 @@ class Tachyon {
 						$content = str_replace( $tag, $new_tag, $content );
 					}
 				} elseif ( preg_match( '#^http(s)?://i[\d]{1}.wp.com#', $src ) && ! empty( $images['link_url'][ $index ] ) && self::validate_image_url( $images['link_url'][ $index ] ) ) {
-					$new_tag = preg_replace( '#(href=["|\'])' . $images['link_url'][ $index ] . '(["|\'])#i', '\1' . tachyon_url( $images['link_url'][ $index ] ) . '\2', $tag, 1 );
+					$new_tag = preg_replace( '#(href=["|\'])' . $images['link_url'][ $index ] . '(["|\'])#i', '\1' . wpimgproxy_url( $images['link_url'][ $index ] ) . '\2', $tag, 1 );
 
 					$content = str_replace( $tag, $new_tag, $content );
 				}
@@ -482,22 +482,22 @@ class Tachyon {
 	 **/
 
 	/**
-	 * Filter post thumbnail image retrieval, passing images through Tachyon
+	 * Filter post thumbnail image retrieval, passing images through WPImgProxy
 	 *
 	 * @param string|bool $image
 	 * @param int $attachment_id
 	 * @param string|array $size
-	 * @uses is_admin, apply_filters, wp_get_attachment_url, self::validate_image_url, this::image_sizes, tachyon_url
+	 * @uses is_admin, apply_filters, wp_get_attachment_url, self::validate_image_url, this::image_sizes, wpimgproxy_url
 	 * @filter image_downsize
 	 * @return string|bool
 	 */
 	public function filter_image_downsize( $image, $attachment_id, $size ) {
 		/**
-		 * Provide plugins a way of enable use of Tachyon in the admin context.
+		 * Provide plugins a way of enable use of WPImgProxy in the admin context.
 		 *
 		 * @since 0.9.2
 		 *
-		 * @param bool true Disable the use of Tachyon in the admin.
+		 * @param bool true Disable the use of WPImgProxy in the admin.
 		 * @param array $args {
 		 * 	 Array of image details.
 		 *
@@ -506,14 +506,14 @@ class Tachyon {
 		 * 	 @type $size Image size. Can be a string (name of the image size, e.g. full), integer or an array e.g. [ width, height ].
 		 * }
 		 */
-		$disable_in_admin = is_admin() && apply_filters( 'tachyon_disable_in_admin', true, compact( 'image', 'attachment_id', 'size' ) );
+		$disable_in_admin = is_admin() && apply_filters( 'wpimgproxy_disable_in_admin', true, compact( 'image', 'attachment_id', 'size' ) );
 
 		/**
-		 * Provide plugins a way of preventing Tachyon from being applied to images retrieved from WordPress Core.
+		 * Provide plugins a way of preventing WPImgProxy from being applied to images retrieved from WordPress Core.
 		 *
 		 * @since 0.9.2
 		 *
-		 * @param bool false Stop Tachyon from being applied to the image. Default to false.
+		 * @param bool false Stop WPImgProxy from being applied to the image. Default to false.
 		 * @param array $args {
 		 * 	 Array of image details.
 		 *
@@ -522,28 +522,28 @@ class Tachyon {
 		 * 	 @type $size Image size. Can be a string (name of the image size, e.g. full), integer or an array e.g. [ width, height ].
 		 * }
 		 */
-		$override_image_downsize = apply_filters( 'tachyon_override_image_downsize', false, compact( 'image', 'attachment_id', 'size' ) );
+		$override_image_downsize = apply_filters( 'wpimgproxy_override_image_downsize', false, compact( 'image', 'attachment_id', 'size' ) );
 
 		if ( $disable_in_admin || $override_image_downsize ) {
 			return $image;
 		}
 
-		// Get the image URL and proceed with Tachyon-ification if successful
+		// Get the image URL and proceed with WPImgProxy-ification if successful
 		$image_url = wp_get_attachment_url( $attachment_id );
 		$full_size_meta = wp_get_attachment_metadata( $attachment_id );
 		$is_intermediate = false;
 
 		if ( $image_url ) {
-			// Check if image URL should be used with Tachyon
+			// Check if image URL should be used with WPImgProxy
 			if ( ! self::validate_image_url( $image_url ) )
 				return $image;
 
-			// If an image is requested with a size known to WordPress, use that size's settings with Tachyon
+			// If an image is requested with a size known to WordPress, use that size's settings with WPImgProxy
 			if ( ( is_string( $size ) || is_int( $size ) ) && array_key_exists( $size, self::image_sizes() ) ) {
 				$image_args = self::image_sizes();
 				$image_args = $image_args[ $size ];
 
-				$tachyon_args = array();
+				$wpimgproxy_args = array();
 
 				$image_meta = image_get_intermediate_size( $attachment_id, $size );
 
@@ -566,14 +566,14 @@ class Tachyon {
 					$is_intermediate = true;
 				}
 
-				// Expose determined arguments to a filter before passing to Tachyon
+				// Expose determined arguments to a filter before passing to WPImgProxy
 				$transform = $image_args['crop'] ? 'resize' : 'fit';
 
 				// If we can't get the width from the image size args, use the width of the
 				// image metadata. We only do this is image_args['width'] is not set, because
-				// we don't want to lose this data. $image_args is used as the Tachyon URL param
+				// we don't want to lose this data. $image_args is used as the WPImgProxy URL param
 				// args, so we want to keep the original image sizes args. For example, if the image
-				// size is 300x300px, non-cropped, we want to pass `fit=300,300` to Tachyon, instead
+				// size is 300x300px, non-cropped, we want to pass `fit=300,300` to WPImgProxy, instead
 				// of say `resize=300,225`, because semantically, the image size is registered as
 				// 300x300 un-cropped, not 300x225 cropped.
 				if ( empty( $image_args['width'] ) && $transform !== 'resize' ) {
@@ -591,12 +591,12 @@ class Tachyon {
 				// Respect $content_width settings.
 				list( $width, $height ) = image_constrain_size_for_editor( $image_meta['width'], $image_meta['height'], $size, 'display' );
 
-				// Check specified image dimensions and account for possible zero values; tachyon fails to resize if a dimension is zero.
+				// Check specified image dimensions and account for possible zero values; wpimgproxy fails to resize if a dimension is zero.
 				if ( ( 0 == $image_args['width'] || 0 == $image_args['height'] ) && $transform !== 'fit' ) {
 					if ( 0 == $image_args['width'] && 0 < $image_args['height'] ) {
-						$tachyon_args['h'] = $image_args['height'];
+						$wpimgproxy_args['h'] = $image_args['height'];
 					} elseif ( 0 == $image_args['height'] && 0 < $image_args['width'] ) {
-						$tachyon_args['w'] = $image_args['width'];
+						$wpimgproxy_args['w'] = $image_args['width'];
 					}
 				} else {
 					// Fit accepts a zero value for either dimension so we allow that.
@@ -611,11 +611,11 @@ class Tachyon {
 
 					// Add transform args if size is intermediate.
 					if ( $is_intermediate ) {
-						$tachyon_args[ $transform ] = $image_args['width'] . ',' . $image_args['height'];
+						$wpimgproxy_args[ $transform ] = $image_args['width'] . ',' . $image_args['height'];
 					}
 
 					if ( $is_intermediate && 'resize' === $transform && is_array( $image_args['crop'] ) ) {
-						$tachyon_args['gravity'] = implode( '', array_map( function ( $v ) {
+						$wpimgproxy_args['gravity'] = implode( '', array_map( function ( $v ) {
 							$map = [
 								'top' => 'north',
 								'center' => '',
@@ -629,10 +629,10 @@ class Tachyon {
 				}
 
 				/**
-				 * Filter the Tachyon Arguments added to an image when going through Tachyon, when that image size is a string.
+				 * Filter the WPImgProxy Arguments added to an image when going through WPImgProxy, when that image size is a string.
 				 * Image size will be a string (e.g. "full", "medium") when it is known to WordPress.
 				 *
-				 * @param array $tachyon_args Array of Tachyon arguments.
+				 * @param array $wpimgproxy_args Array of WPImgProxy arguments.
 				 * @param array $args {
 				 * 	 Array of image details.
 				 *
@@ -644,11 +644,11 @@ class Tachyon {
 				 *                    @see https://developer.wordpress.com/docs/photon/api
 				 * }
 				 */
-				$tachyon_args = apply_filters( 'tachyon_image_downsize_string', $tachyon_args, compact( 'image_args', 'image_url', 'attachment_id', 'size', 'transform' ) );
+				$wpimgproxy_args = apply_filters( 'wpimgproxy_image_downsize_string', $wpimgproxy_args, compact( 'image_args', 'image_url', 'attachment_id', 'size', 'transform' ) );
 
-				// Generate Tachyon URL.
+				// Generate WPImgProxy URL.
 				$image = array(
-					tachyon_url( $image_url, $tachyon_args ),
+					wpimgproxy_url( $image_url, $wpimgproxy_args ),
 					$width,
 					$height,
 					$is_intermediate,
@@ -678,18 +678,18 @@ class Tachyon {
 
 				list( $width, $height ) = image_constrain_size_for_editor( $width, $height, $size );
 
-				$tachyon_args = array();
+				$wpimgproxy_args = array();
 
-				// Expose arguments to a filter before passing to Tachyon
+				// Expose arguments to a filter before passing to WPImgProxy
 				if ( $is_intermediate ) {
-					$tachyon_args['fit'] = $width . ',' . $height;
+					$wpimgproxy_args['fit'] = $width . ',' . $height;
 				}
 
 				/**
-				 * Filter the Tachyon Arguments added to an image when going through Tachyon,
+				 * Filter the WPImgProxy Arguments added to an image when going through WPImgProxy,
 				 * when the image size is an array of height and width values.
 				 *
-				 * @param array $tachyon_args Array of Tachyon arguments.
+				 * @param array $wpimgproxy_args Array of WPImgProxy arguments.
 				 * @param array $args {
 				 * 	 Array of image details.
 				 *
@@ -699,11 +699,11 @@ class Tachyon {
 				 * 	 @type $attachment_id Attachment ID of the image.
 				 * }
 				 */
-				$tachyon_args = apply_filters( 'tachyon_image_downsize_array', $tachyon_args, compact( 'width', 'height', 'image_url', 'attachment_id' ) );
+				$wpimgproxy_args = apply_filters( 'wpimgproxy_image_downsize_array', $wpimgproxy_args, compact( 'width', 'height', 'image_url', 'attachment_id' ) );
 
-				// Generate Tachyon URL
+				// Generate WPImgProxy URL
 				$image = array(
-					tachyon_url( $image_url, $tachyon_args ),
+					wpimgproxy_url( $image_url, $wpimgproxy_args ),
 					$width,
 					$height,
 					$is_intermediate,
@@ -715,12 +715,12 @@ class Tachyon {
 	}
 
 	/**
-	 * Filters an array of image `srcset` values, replacing each URL with its Tachyon equivalent.
+	 * Filters an array of image `srcset` values, replacing each URL with its WPImgProxy equivalent.
 	 *
 	 * @since 3.8.0
 	 * @param array $sources An array of image urls and widths.
-	 * @uses self::validate_image_url, tachyon_url
-	 * @return array An array of Tachyon image urls and widths.
+	 * @uses self::validate_image_url, wpimgproxy_url
+	 * @return array An array of WPImgProxy image urls and widths.
 	 */
 	public function filter_srcset_array( $sources, $size_array, $image_src, $image_meta, $attachment_id ) {
 		$upload_dir = wp_upload_dir();
@@ -758,10 +758,10 @@ class Tachyon {
 			}
 
 			/**
-			 * Filter the array of Tachyon arguments added to an image when it goes through Tachyon.
+			 * Filter the array of WPImgProxy arguments added to an image when it goes through WPImgProxy.
 			 * By default, contains only resize or width params
 			 *
-			 * @param array $args Array of Tachyon Arguments.
+			 * @param array $args Array of WPImgProxy Arguments.
 			 * @param array $args {
 			 * 	 Array of image details.
 			 *
@@ -772,9 +772,9 @@ class Tachyon {
 			 * 	 @type $attachment_id Image ID.
 			 * }
 			 */
-			$args = apply_filters( 'tachyon_srcset_image_args', $args, compact( 'source', 'image_meta', 'width', 'height', 'attachment_id' ) );
+			$args = apply_filters( 'wpimgproxy_srcset_image_args', $args, compact( 'source', 'image_meta', 'width', 'height', 'attachment_id' ) );
 
-			$sources[ $i ]['url'] = tachyon_url( $url, $args );
+			$sources[ $i ]['url'] = wpimgproxy_url( $url, $args );
 		}
 
 		return $sources;
@@ -785,9 +785,9 @@ class Tachyon {
 	 **/
 
 	/**
-	 * Ensure image URL is valid for Tachyon.
+	 * Ensure image URL is valid for WPImgProxy.
 	 *
-	 * Though Tachyon functions address some of the URL issues, we should avoid unnecessary processing if we know early on that the image isn't supported.
+	 * Though WPImgProxy functions address some of the URL issues, we should avoid unnecessary processing if we know early on that the image isn't supported.
 	 *
 	 * @param string $url
 	 * @uses wp_parse_args
@@ -816,17 +816,17 @@ class Tachyon {
 			return false;
 		}
 
-		return apply_filters( 'tachyon_validate_image_url', true, $url, $parsed_url );
+		return apply_filters( 'wpimgproxy_validate_image_url', true, $url, $parsed_url );
 	}
 
 	/**
-	 * Checks if the file exists before it passes the file to tachyon
+	 * Checks if the file exists before it passes the file to wpimgproxy
 	 *
 	 * @param string $src The image URL
 	 * @return string
 	 **/
 	protected static function strip_image_dimensions_maybe( $src ) {
-		// Build URL, first removing WP's resized string so we pass the original image to Tachyon
+		// Build URL, first removing WP's resized string so we pass the original image to WPImgProxy
 		if ( preg_match( '#(-\d+x\d+)\.(' . implode( '|', self::$extensions ) . '){1}$#i', $src, $src_parts ) ) {
 			$src = str_replace( $src_parts[1], '', $src );
 		}
@@ -890,15 +890,15 @@ class Tachyon {
 
 
 	/**
-	 * Determine if image_downsize should utilize Tachyon via REST API.
+	 * Determine if image_downsize should utilize WPImgProxy via REST API.
 	 *
 	 * The WordPress Block Editor (Gutenberg) and other REST API consumers using the wp/v2/media endpoint, especially in the "edit"
-	 * context is more akin to the is_admin usage of Tachyon (see filter_image_downsize). Since consumers are trying to edit content in posts,
-	 * Tachyon should not fire as it will fire later on display. By aborting an attempt to change an image here, we
+	 * context is more akin to the is_admin usage of WPImgProxy (see filter_image_downsize). Since consumers are trying to edit content in posts,
+	 * WPImgProxy should not fire as it will fire later on display. By aborting an attempt to change an image here, we
 	 * prevents issues like https://github.com/Automattic/jetpack/issues/10580
 	 *
 	 * To determine if we're using the wp/v2/media endpoint, we hook onto the `rest_request_before_callbacks` filter and
-	 * if determined we are using it in the edit context, we'll false out the `tachyon_override_image_downsize` filter.
+	 * if determined we are using it in the edit context, we'll false out the `wpimgproxy_override_image_downsize` filter.
 	 *
 	 * @author JetPack Photo / Automattic
 	 * @param null|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
@@ -922,7 +922,7 @@ class Tachyon {
 		if ( false !== strpos( $route, 'wp/v2/media' ) && 'edit' === $request['context'] ) {
 			// Don't use `__return_true()`: Use something unique. See ::_override_image_downsize_in_rest_edit_context()
 			// Late execution to avoid conflict with other plugins as we really don't want to run in this situation.
-			add_filter( 'tachyon_override_image_downsize', array( $this, '_override_image_downsize_in_rest_edit_context' ), 999999 );
+			add_filter( 'wpimgproxy_override_image_downsize', array( $this, '_override_image_downsize_in_rest_edit_context' ), 999999 );
 		}
 
 		return $response;
@@ -939,12 +939,12 @@ class Tachyon {
 	 * @return mixed Unchanged $response
 	 */
 	public function cleanup_rest_image_downsize( $response ) {
-		remove_filter( 'tachyon_override_image_downsize', array( $this, '_override_image_downsize_in_rest_edit_context' ), 999999 );
+		remove_filter( 'wpimgproxy_override_image_downsize', array( $this, '_override_image_downsize_in_rest_edit_context' ), 999999 );
 		return $response;
 	}
 
 	/**
-	 * Used internally by ::should_rest_image_downsize() to not tachyonize
+	 * Used internally by ::should_rest_image_downsize() to not wpimgproxyize
 	 * image URLs in ?context=edit REST requests.
 	 * MUST NOT be used anywhere else.
 	 * We use a unique function instead of __return_true so that we can clean up
