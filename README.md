@@ -124,7 +124,7 @@ add_filter( 'tachyon_remove_size_attributes', '__return_true' );
 ```
 -->
 
-**This is under construction and far away from being done.**
+# This is under construction and far away from being done. Do not use!
 
 WP-ImgProxy is a WordPress plugin for the [imgproxy](https://github.com/imgproxy/imgproxy) image resizing service. It is intended to be used in combination with an S3-compatible bucket, that holds the source image files. I am writing this for my own use and at the moment I am not planning to extend the functionality of this plugin beyond that scope.
 
